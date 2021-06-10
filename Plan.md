@@ -17,7 +17,7 @@
 - Corps  
   Vue chronologique des fonctionnalités implémentées avec:
   - Objectifs
-  - Choix techniques
+  - Choix techniques / Problèmes
   - Fonctionnalité terminée
 - Conclusions et Perspectives futures
   - Résussite du projet
