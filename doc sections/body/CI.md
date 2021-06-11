@@ -9,4 +9,4 @@
 - Comparaison de possibilités
   - Vercel
   - Docker
-  -
+  - Statique
