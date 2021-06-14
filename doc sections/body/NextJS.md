@@ -1,6 +1,19 @@
 # Technologies de rendu
 
-## React
+## ReactJS
+
+### Qu'est-ce que ReactJS
+
+ReactJS est une librairie de rendu d'interface s'interfaçant entre le JavaScript et le DOM.
+La librairie React est Open Source et est maintenue par Facebook.
+
+### Avantages
+
+#### Gestion d'état
+
+ReactJs a une vision très fonctionelle du rendu Web. L'affichage est le résultat d'une séries de fonctions.
+
+    UI = F(props)
 
 - Permettre une gestion d'état simplifiée, par exemple les selections
 
@@ -9,6 +22,8 @@
 ### Qu'est-ce que NextJS?
 
 NextJS est un framework construit autour de ReactJS permettant le rendu de pages par le serveur en plus du client.
+
+Le framework NextJS est Open Source et est maintenu par Vercel.
 
 ### Avantages
 
@@ -40,7 +55,7 @@ Example de routage des groupes:
 
 ![Example de routage des groupes](/assets/route_groups.png)
 
-Le routage se fait d'une façon similaire au traditionnel php.
+Le routage se fait d'une façon similaire au traditionnel php, chaque fichier correspondant à une route.
 
 ### Intérêt dans le cas d'intrepid
 
@@ -65,10 +80,18 @@ Voici trois example de pages:
 
   NextJs permet de charger la librairie de calendrier uniquement sur cette page. Le chargement des autres pages de l'application sera ainsi accéléré.
 
+On peut donc dire qu'avec NextJS, IntrepidKnowledge gagnerait en:
+
+- Vitesse de chargement
+
+  Le "bundle" JavaScript actuel mesure 8.73MB (1.65MB après cache) et utilise 39 fichiers. Il pourrait être réduit grâce à la minification (webpack) et les imports dynamiques de NextJS.
+
+- Stabilité
+
+  L'utilisation de React facilite la gestion d'état de l'application, par exemple la sélections d'élements.
+
 ### //CHOSES A DIRE//
 
-- Kesako
-- Intérêt dans le cas d'intrepidknowledge (malgré le dynamisme)
 - Routage
   - Respect de la convention REST
   - Approche pour permettre le multi-instance
