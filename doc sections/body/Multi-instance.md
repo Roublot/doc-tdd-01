@@ -118,8 +118,33 @@ Informations notables:
   - `ui/components` contient la plupart des components utilisés dans l'application. Celà pose un problème (Voir la section [Problèmes et améliorations](#librairie-ui-components)).
   - `ui/pages` contient les pages communes à toutes les instances
     - `next` et `react` contiennent pratiquement les mêmes pages (Voir la section [Problèmes et améliorations](#séparation-des-librairies)).
+    - `styles` contient une librairie de _styled-components_.
 - `tools/generator` contient les générateurs custom
 - `dist` contient les fichiers de build des applications et librairies.
+
+#### Dépendances
+
+La puissance de NX réside dans sa construction d'un arbre de dépendances. Un projet ne sera _rebuilt_ que si ses dépendances changent.
+
+Les dépendances sont identifié lors de leur import dans une autre librairie ou app. Les chemins d'imports sont virtuels et se composent de la sorte:
+
+    @[workspace]/[library]
+
+L'exemple suivant montre l'import d'un svg depuis la librairie `ui-assets`
+
+```tsx
+import { Star } from "@ws/ui/assets";
+```
+
+_Graphique de dépendances du projet (généré par NX). Les flèches représentent une dépendance_
+
+![dep graph](/assets/full-dep-graph.png)
+
+Les dépendances entre applications et librairies sont unidirectionnelles ce qui veut dire qu'une librairie ne peut pas dépendre d'une application.
+
+Cet exemple montre bien l'unidirectionnalité des dépendances.
+
+![simple dep graph](/assets/intrepid-dep-graph.png)
 
 ## Components spécifiques
 
@@ -156,9 +181,101 @@ Le problème est le même que le précédent car cette approche mène à complex
 
 La solution, retenue, du provider de components est d'utiliser un _provider_ React pour mettre à disposition les components spécifiques. Ainsi nous n'avons plus besoin de passer de configuration en profondeur car l'override se fait au niveau du component.
 
-> TODO: _Décrire l'utilisation pour React-Next_
+La solution n'a pas été mise en oeuvre pour le multi-instance mais a été utilisée pour obtenir des components compatible entre React-Router et Next-Router. En effet l'application éléctron utilise React-Router.
 
-> TODO: _Exemple de code:_
+L'exemple ci dessous montre l'utilisation du component `NavLink` qui est différent en fonction de la plateforme (react/next). Dans ce cas le hook de traduction `useTranslation` y est également récupérée par le hook `usePlatform`.
+
+```tsx
+export const GroupsLeftMenu: React.FC = () => {
+  //get platform specific items
+  const { NavLink, useTranslation } = usePlatform();
+  const { t } = useTranslation();
+
+  return (
+    <NavLink href="/groups">{t("intrepid.pages.groups.allMyGroups")}</NavLink>
+  );
+};
+```
+
+Ces éléments sont présents dans le `PlatformContext` dont voici la définition.
+
+```tsx
+export const PlatformContext = React.createContext<PlatformContextValue>({
+  Link: undefined,
+  NavLink: undefined,
+  Image: undefined,
+  Head: undefined,
+  useTranslation: undefined,
+  useRouter: undefined,
+});
+```
+
+Le typage est particulier car il doit pouvoir contenir les différent types en fonction du nombre de plateformes. L'union de type `|` est utilisée. (Lorsqu'un seul type est spécifié c'est que la version React n'a pas encore été implémentée).
+
+```tsx
+export interface PlatformContextValue {
+  Link: typeof ReactLink | typeof NextLink;
+  NavLink: typeof ReactRouterNavLink | typeof NextNavLink;
+  Image?: typeof NextImage | HTMLFactory<HTMLImageElement>;
+  Head: typeof Helmet | typeof NextHead;
+  useTranslation: typeof nextUseTranslation;
+  useRouter: typeof useRouter;
+}
+```
+
+Pour permettre ce comportement l'application entière est encapsulée dans un component provider du `PlatformContext`. Les components fournis sont évidemment différents entre les plateformes,
+
+App Next (\_app.tsx):
+
+```tsx
+function App({ Component }: AppProps): JSX.Element {
+  const platformContextValue: PlatformContextValue = {
+    Head: NextHead,
+    Link: NextLink,
+    NavLink: NextNavLink,
+    Image: NextImage,
+    useTranslation,
+    useRouter,
+  };
+
+  return (
+    <PlatformContext.Provider value={platformContextValue}>
+      <Component />
+    </PlatformContext.Provider>
+  );
+}
+```
+
+App React (app.tsx):
+
+```tsx
+export function App(): JSX.Element {
+  const platformContextValue: PlatformContextValue = {
+    Link: ReactLink,
+    NavLink: ReactNavLink,
+    Head: Helmet,
+    //fake implementations to prevent crash:
+    useTranslation: () => ({ t: (s: string) => s }),
+    useRouter: () => ({}),
+  };
+
+  return (
+    <PlatformContext.Provider value={platformContextValue}>
+      <Router>...</Router>
+    </PlatformContext.Provider>
+  );
+}
+```
+
+Il est alors facile d'imaginer l'implémentation d'un mécanisme similaire pour les instances avec un `InstanceContext` à l'instar du `PlatformContext`.
+
+**Problème de cette approche**
+
+Le principal problème de cette approche est que les components doivent avoir la même structure (interface) de _props_ afin de pouvoir être interchangeables.
+
+Cependant ce problème ne devrait se manifester lorsque des changements plus profonds dans la fonctionnalité du component sont modifié entre les plateformes.
+
+Pour résoudre ce problème, l'utilisation de composition devrait suffir, c'est à dire encapsuler les changements d'interface à l'aide d'un component intermédiaire.
 
 ## Problèmes et améliorations
 
