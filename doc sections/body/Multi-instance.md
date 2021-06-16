@@ -47,11 +47,136 @@ Celà permet de rapidement déployer une modification sur toutes les instances s
 
 Cette solution présente quelques inconvénients:
 
-- Le risque de régression des autres instances est toujours présent
-- Les messages de commits des instances et des librairies sont tous à plat
--
+1. Le risque de régression des autres instances est toujours présent
+2. Les messages de commits des instances et des librairies sont tous à plat
+3. Le repository a une grande taille.
+4. L'intégration continue redéploie l'intégralité des applications/instances
 
-# BLABLABLA
+**Solutions**
+
+1. Le risque de régression peut être très diminué grâce à une couverture de tests suffisante, ce qui est aussi un objectif de ce projet.
+2. Des outils existent afin d'avoir un affichage des commits par dossier (par exemple `git log --follow [folder]`)
+3. Le problème de taille n'est n'est pas vraiment un car il n'y a pas besoin de télécharger des dépendances pour toutes les librairies. En effet elles sont déjà présentes dans le repo. De plus le `clone` initial n'a besoin d'être fait qu'une fois.
+
+   [Des propositions](https://gitlab.com/groups/gitlab-org/-/epics/93) existent cependant pour tenter de résoudre ce problème en téléchargeant les fichiers à la demande.
+
+4. Ce problème est résolu par NX, expliqué [plus bas](#nx).
+
+**Choix**
+
+Les avantages listés au dessus ont permit de choisir la structure MonoRepo avec NX.
+
+Le point décisif a été la vitesse de développement. En effet chez WorkStreams, le développement est principalement réalisé par une seule personne. La séparation en différents packages npm aurait rendu le développement trop fastidieux.
+
+### NX
+
+NX est un outil de gestion de monorepo.
+L'outil est développé par Nrwl.
+
+Les fonctionnalités clés de NX sont:
+
+- Structure monorepo
+- Intégration par dépendance
+- Générateurs
+
+#### Structure monorepo
+
+NX propose une structure basée sur des applications et des librairies.
+La structure de dossiers est la suivante:
+
+    📦 nx-monorepo
+    ┣━📂 apps
+    ┃ ┣━📂 e-cffe.ch
+    ┃ ┣━📂 hfrformation.ch
+    ┃ ┗━📂 intrepidknowledge.ch
+    ┣━📂 dist
+    ┃ ┗━📂 apps
+    ┃   ┗━📂 intrepidknowledge
+    ┣━📂 libs
+    ┃ ┣━📂 helpers
+    ┃ ┗━📂 ui
+    ┃   ┣━📂 assets
+    ┃   ┣━📂 components
+    ┃   ┣━📂 contexts
+    ┃   ┣━📂 hooks
+    ┃   ┣━📂 layouts
+    ┃   ┣━📂 pages
+    ┃   ┃ ┣━📂 next
+    ┃   ┃ ┣━📂 react
+    ┃   ┃ ┗━📂 styles
+    ┃   ┗━📂 popups
+    ┗━📂 tools
+      ┗━📂 generator
+        ┗━📂 instance
+
+Informations notables:
+
+- `apps` contient les applications
+  - `e-cffe.ch`, `hfrformation.ch` et `intrepidknowledge.ch` sont des instances de la plateforme IntrepidKnowledge.
+- `libs` contient les différentes librairies partagées
+  - `ui/assets` contient des svg transformés en components React par _svgr_
+  - `ui/components` contient la plupart des components utilisés dans l'application. Celà pose un problème (Voir la section [Problèmes et améliorations](#librairie-ui-components)).
+  - `ui/pages` contient les pages communes à toutes les instances
+    - `next` et `react` contiennent pratiquement les mêmes pages (Voir la section [Problèmes et améliorations](#séparation-des-librairies)).
+- `tools/generator` contient les générateurs custom
+- `dist` contient les fichiers de build des applications et librairies.
+
+## Components spécifiques
+
+Même si la plupart du code est partagé entre les instances, il faut pouvoir injecter des personnalisations dans les différentes instances.
+
+### Approches
+
+#### Approche historique - configuration JSON
+
+Dans la plateforme historique la construction se fait par des fichiers JSON définissant la structure et le paramétrage de toute l'application. Ele agit plus comme un fichier de configuration. Elle définit les pages et leur contenu (barre d'action, appels api, construction de liste). Ces configurations sont passées en profondeur à des méthodes de construction.
+
+Des fichiers d'_override_ sont définit dans chaque instances et permettent de remplacer certaines configurations en profondeur.
+
+Cette approche fonctionne bien lorsque qu'un changement majeur doit être effectué entre les instances, par exemple le contenu d'une page ou la présence d'une barre d'action.
+
+Cependant quand des changements dans les "components" eux-mêmes doivent être faits, deux approches sont faites:
+
+- Ajout de paramètres supplémentaires au component permettant un affichage différent.
+- Override du "component" pour l'instance. Le component doit être entièrement réécrit.
+
+Ces deux approches ont le problème de complexifier le code avec des conditions ou d'apporter de la duplication de code.
+
+Les styles peuvent également avoir des _overrides_.
+
+Globalement ce système fonctionne bien mais peut être amélioré.
+
+#### Fichier de configuration
+
+Une solution est de reprendre un système similaire à la plateforme historique sauf que le fichier de configuration n'est pas utilisé directement pour construire l'interface mais est passé par _props_ aux components en profondeur lorsqu'on veut pouvoir paramétrer un affichage particulier.
+
+Le problème est le même que le précédent car cette approche mène à complexification du code. Cependant grâce à la composition de React ce problème serait probablement moins présent.
+
+#### Provider de components
+
+La solution, retenue, du provider de components est d'utiliser un _provider_ React pour mettre à disposition les components spécifiques. Ainsi nous n'avons plus besoin de passer de configuration en profondeur car l'override se fait au niveau du component.
+
+> TODO: _Décrire l'utilisation pour React-Next_
+
+> TODO: _Exemple de code:_
+
+## Problèmes et améliorations
+
+### Librairie "ui-components"
+
+Actuellement trop d'éléments se trouvent dans la librairie `ui/component`. Celà pourrait poser un problème car à la moindre modification d'un component contenu dans cette librairie, la totalité des applications ayant une référence à la librairie auraient besoin d'être _built_ - _tested_ - _deployed_.
+
+En extrayant les components vers des sous-librairies plus précises de components, par exemple `ui/components/groups` qui contiendrait tous les components liés aux groupes, ce problème pourrait disparaître.
+
+Ce n'est pas un gros problème pour le moment étant donné le nombre réduit d'applications.
+
+### Librairies "ui-pages"
+
+Le fait que la librairie "ui-page-next" et "ui-pages-react" soient des librairies séparées est dû à l'application Electron développée en parallèle sur la même base. Des problèmes de compatibilité se sont présentés car React et Next n'utilisent pas le même routage.
+
+Une solution à ce problème a désormais été trouvée, comme expliqué dans la section [Components spécifiques](#components-spécifiques), ce qui permettra à la séparation entre les deux librairies de disparaître.
+
+# A ÉCRIRE:
 
 ## Monorepo et librairies
 
@@ -66,3 +191,41 @@ React Providers, Multi targets (Electron)
 ## Comparaison customisation par routage vs provider
 
 ## Importance des tests pour le multi-instance
+
+<!-- Styles for markdown numbered headings -->
+<style>
+body {
+    counter-reset: h1 0;
+}
+
+h1 {
+    counter-reset: h2;
+}
+
+h2 {
+    counter-reset: h3;
+}
+
+h3 {
+    counter-reset: h4;
+}
+
+h1:before {
+    counter-increment: h1;
+    content: counter(h1) ". ";
+}
+
+h2:before {
+    counter-increment: h2;
+    content: counter(h1) "." counter(h2) ". ";
+}
+
+h3:before {
+    counter-increment: h3;
+    content: counter(h1) "." counter(h2) "." counter(h3) ". ";
+}
+
+h4:before {
+    counter-increment: h4;
+    content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) ". ";
+}</style>

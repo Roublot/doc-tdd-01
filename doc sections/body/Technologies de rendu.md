@@ -1,3 +1,5 @@
+# Technologies de rendu
+
 - [Technologies de rendu](#technologies-de-rendu)
   - [ReactJS](#reactjs)
     - [Qu'est-ce que ReactJS](#quest-ce-que-reactjs)
@@ -12,9 +14,6 @@
       - [Vitesse d'affichage](#vitesse-daffichage)
       - [Structure](#structure)
     - [Intérêt dans le cas d'intrepid](#intérêt-dans-le-cas-dintrepid-1)
-
-
-# Technologies de rendu
 
 ## ReactJS
 
@@ -128,8 +127,8 @@ Le routage se fait d'une façon similaire au traditionnel php, chaque fichier co
 
 ### Intérêt dans le cas d'intrepid
 
-Intrepidknowledge contient un grand nombre de pages dont le contenu peut être très différent.  
-Voici trois example de pages:
+IntrepidKnowledge contient un grand nombre de pages dont le contenu peut être très différent.  
+Voici trois exemples de pages:
 
 - Page "Groupes"
 
@@ -163,8 +162,7 @@ On peut donc dire qu'avec NextJS, IntrepidKnowledge gagnerait en:
   Le routage en serait également amélioré car il pourrait respecter les standards REST. Actuellement seule la première section du path identifie la page.  
   `/group/#16253` deviendrait `/groups/16253`
 
-
-<!-- Styles for headings -->
+<!-- Styles for markdown numbered headings -->
 <style>
 body {
     counter-reset: h1 0;

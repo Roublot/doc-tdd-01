@@ -1,3 +1,5 @@
+> Ce document contient des liens hypertexte. La lecture de la version Markdown est conseillée.
+
 # Introduction
 
 ## Cadre
