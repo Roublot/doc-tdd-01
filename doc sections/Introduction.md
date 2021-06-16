@@ -49,3 +49,5 @@ En parallèle, une refonte de l'environnement de développement sera réalisée 
 - Des tests (unitaires ou d'intégration)
 - Une intégration continue partielle (lancement des tests sur GitLab, build de l'application pour le déploiement...)
 - Une solution de monitoring d'erreurs post-déploiement
+
+Les objectifs complets sont présentés dans le [Cahier des charges](../CDC%20Nicolas%20Maitre%20WS%20v2.docx)
