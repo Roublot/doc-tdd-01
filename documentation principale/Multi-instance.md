@@ -16,12 +16,10 @@
       - [Approche historique - configuration JSON](#approche-historique---configuration-json)
       - [Fichier de configuration](#fichier-de-configuration)
       - [Provider de components](#provider-de-components)
+  - [Création d'instance](#création-dinstance)
   - [Problèmes et améliorations](#problèmes-et-améliorations)
     - [Librairie "ui-components"](#librairie-ui-components)
     - [Librairies "ui-pages"](#librairies-ui-pages)
-- [A ÉCRIRE:](#a-écrire)
-  - [Comparaison customisation par routage vs provider](#comparaison-customisation-par-routage-vs-provider)
-  - [Importance des tests pour le multi-instance](#importance-des-tests-pour-le-multi-instance)
 
 ## Problématique
 
@@ -142,7 +140,7 @@ Informations notables:
   - `ui/pages` contient les pages communes à toutes les instances
     - `next` et `react` contiennent pratiquement les mêmes pages (Voir la section [Problèmes et améliorations](#séparation-des-librairies)).
     - `styles` contient une librairie de _styled-components_.
-- `tools/generator` contient les générateurs custom
+- `tools/generator` contient les générateurs custom (Voir la section [Création d'instance](#création-dinstance))
 - `dist` contient les fichiers de build des applications et librairies.
 
 #### Dépendances
@@ -343,7 +341,15 @@ Le principal problème de cette approche est que les components doivent avoir la
 
 Cependant ce problème ne devrait se manifester lorsque des changements plus profonds dans la fonctionnalité du component sont modifié entre les plateformes.
 
-Pour résoudre ce problème, l'utilisation de composition devrait suffir, c'est à dire encapsuler les changements d'interface à l'aide d'un component intermédiaire.
+Pour résoudre ce problème, l'utilisation de composition devrait suffire, c'est à dire encapsuler les changements d'interface à l'aide d'un component intermédiaire.
+
+## Création d'instance
+
+Un objectif secondaire du projet était la mise en place d'une automatisation de la création d'instances. En effet cette création implique un travail répétitif de configuration et de personnalisation.
+
+L'idée d'un script de création acceptant en paramètre les personnalisations les plus communes s'est alors imposée.
+
+L'outil NX propose la création de "générateurs". Ce sont des scripts
 
 ## Problèmes et améliorations
 
@@ -361,11 +367,7 @@ Le fait que la librairie "ui-page-next" et "ui-pages-react" soient des librairie
 
 Une solution à ce problème a désormais été trouvée, comme expliqué dans la section [Components spécifiques](#components-spécifiques), ce qui permettra à la séparation entre les deux librairies de disparaître.
 
-# A ÉCRIRE:
-
-## Comparaison customisation par routage vs provider
-
-## Importance des tests pour le multi-instance
+> générateur d'instance
 
 <!-- Styles for markdown numbered headings -->
 <style>

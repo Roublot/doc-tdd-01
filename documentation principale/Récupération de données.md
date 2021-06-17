@@ -80,9 +80,11 @@ Voilà les éléments à noter:
 
 Pour l'intégration à NextJS
 
+TODO finir phrase
+
 ## Résultat
 
-Le résultat de l'utilisation de ReactQuery mets à disposition des hooks custom rendant facile l'intégration de données serveur sur n'importe quelle page. La solution intégrée de cache fonctionne très bien et permet de ne pas à avoir à gérer cette partie complexe.
+Le résultat de l'utilisation de ReactQuery mets à disposition des hooks custom rendant facile l'intégration de données serveur sur n'importe quelle page. La solution intégrée de cache est performante et permet de ne pas à avoir à gérer cette partie complexe.
 L'intégration de RectQuery à NextJS permet de préremplir le cache de la page "news" et ainsi économiser des appels à l'API.
 
 ## Améliorations

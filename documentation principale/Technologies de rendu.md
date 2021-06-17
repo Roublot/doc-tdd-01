@@ -189,7 +189,7 @@ export const GroupsPage: FC = () => {
 
 Voici le résultat sur le site.
 
-![Page des groupes avec layout](../../assets/groups%20page%20layout.png)
+![Page des groupes avec layout](/assets/groups%20page%20layout.png)
 
 - En bleu: \<MainLayout>
 - En rouge: \<GroupsLayout>
