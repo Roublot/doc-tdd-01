@@ -1,5 +1,28 @@
 # Organisation Multi-instance
 
+- [Organisation Multi-instance](#organisation-multi-instance)
+  - [Problématique](#problématique)
+  - [Partage du code](#partage-du-code)
+    - [Repository par app avec packages](#repository-par-app-avec-packages)
+    - [Monorepo](#monorepo)
+    - [NX](#nx)
+      - [Structure monorepo](#structure-monorepo)
+      - [Dépendances](#dépendances)
+  - [Routage et pages](#routage-et-pages)
+    - [Pages communes](#pages-communes)
+    - [Pages spécifiques](#pages-spécifiques)
+  - [Components spécifiques](#components-spécifiques)
+    - [Approches](#approches)
+      - [Approche historique - configuration JSON](#approche-historique---configuration-json)
+      - [Fichier de configuration](#fichier-de-configuration)
+      - [Provider de components](#provider-de-components)
+  - [Problèmes et améliorations](#problèmes-et-améliorations)
+    - [Librairie "ui-components"](#librairie-ui-components)
+    - [Librairies "ui-pages"](#librairies-ui-pages)
+- [A ÉCRIRE:](#a-écrire)
+  - [Comparaison customisation par routage vs provider](#comparaison-customisation-par-routage-vs-provider)
+  - [Importance des tests pour le multi-instance](#importance-des-tests-pour-le-multi-instance)
+
 ## Problématique
 
 IntrepidKnowledge possède une quinzaines de plateformes (instances) conçues sur la même base. Elles partagent la plupart du code ce qui permet de faire des mises-à-jour communes.
@@ -142,9 +165,52 @@ _Graphique de dépendances du projet (généré par NX). Les flèches représent
 
 Les dépendances entre applications et librairies sont unidirectionnelles ce qui veut dire qu'une librairie ne peut pas dépendre d'une application.
 
-Cet exemple montre bien l'unidirectionnalité des dépendances.
+Cet exemple montre bien l'unidirectionnalité des dépendances
 
 ![simple dep graph](/assets/intrepid-dep-graph.png)
+
+## Routage et pages
+
+Avec NextJS, le routage est lié à la structure de dossier des pages.
+
+Un exemple de structure de routage est disponible dans la section [Technologies de rendu -> NextJS -> Avantages -> Structure](./Technologies%20de%20rendu.md#structure)
+
+Ce design permet de très facilement mettre en place des pages personnalisées par instance.
+
+### Pages communes
+
+Les pages communes aux instances sont exportées depuis la librairie `ui-pages`
+
+Exemple de définition d'une route pour une page commune entre instances. Ici la page "groups".  
+Le fichier se situe à `intrepidknowledge/src/pages/groups/index.tsx`
+
+```tsx
+export { GroupsPage as default } from "@ws/ui/pages/next";
+export { getSPTranslations as getStaticProps } from "@ws/next-ssr";
+```
+
+Dans cet exemple la page "groups" est utilisée telle-quelle depuis la librairie `ui-pages`.
+
+La seconde ligne est expliquée dans la section [Traductions]()  
+TODO: Link to section
+
+### Pages spécifiques
+
+Pour créer une page spécifique, il suffit de la créer directement dans le fichier de route.
+
+Il n'y a pas de page spécifique pour le moment donc le code n'est qu'un exemple.
+
+```tsx
+  const PortfolioPage:PageWithLayout = () => {
+    return <>
+      <h1>Mon portfolio</h1>
+    </>
+  }
+  ...
+  export PortfolioPage as default;
+```
+
+La notion de `PageWithLayout` est expliquée dans la section [Technologies de rendu -> NextJS -> Problèmes rencontrés -> Layouts](Technologies%20de%20rendu.md#layouts)
 
 ## Components spécifiques
 
@@ -269,6 +335,8 @@ export function App(): JSX.Element {
 
 Il est alors facile d'imaginer l'implémentation d'un mécanisme similaire pour les instances avec un `InstanceContext` à l'instar du `PlatformContext`.
 
+Le système d'`InstanceContext` n'a malheureusement pas été implémenté.
+
 **Problème de cette approche**
 
 Le principal problème de cette approche est que les components doivent avoir la même structure (interface) de _props_ afin de pouvoir être interchangeables.
@@ -294,16 +362,6 @@ Le fait que la librairie "ui-page-next" et "ui-pages-react" soient des librairie
 Une solution à ce problème a désormais été trouvée, comme expliqué dans la section [Components spécifiques](#components-spécifiques), ce qui permettra à la séparation entre les deux librairies de disparaître.
 
 # A ÉCRIRE:
-
-## Monorepo et librairies
-
-NX...
-Système de librairies
-Dépendances unidirectionnelles
-
-## Providers de components
-
-React Providers, Multi targets (Electron)
 
 ## Comparaison customisation par routage vs provider
 
