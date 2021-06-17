@@ -121,9 +121,8 @@ NextJS étant un framework, il impose une certaine structure. Celà permet de ne
 
 La structure des pages, par exemple, est liée au système de routage.
 
-Example de routage des groupes:
-
-![Example de routage des groupes](/assets/route_groups.png)
+![Example de routage des groupes](/assets/route_groups.png)  
+_Example de routage des groupes_
 
 Le routage se fait d'une façon similaire au traditionnel php, chaque fichier correspondant à une route.
 

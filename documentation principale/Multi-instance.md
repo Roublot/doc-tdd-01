@@ -157,9 +157,8 @@ L'exemple suivant montre l'import d'un svg depuis la librairie `ui-assets`
 import { Star } from "@ws/ui/assets";
 ```
 
+![dep graph](/assets/full-dep-graph.png)  
 _Graphique de dépendances du projet (généré par NX). Les flèches représentent une dépendance_
-
-![dep graph](/assets/full-dep-graph.png)
 
 Les dépendances entre applications et librairies sont unidirectionnelles ce qui veut dire qu'une librairie ne peut pas dépendre d'une application.
 
@@ -349,7 +348,18 @@ Un objectif secondaire du projet était la mise en place d'une automatisation de
 
 L'idée d'un script de création acceptant en paramètre les personnalisations les plus communes s'est alors imposée.
 
-L'outil NX propose la création de "générateurs". Ce sont des scripts
+L'outil NX propose la création de "générateurs". Ce sont des scripts écrit en JS/TS permettant d'utiliser directement les fonctionnalités de NX (par exemple la création d'une application). Les générateurs permettent aussi d'afficher une interface graphique au sein de vscode permettant de paramétrer le script.
+
+À l'aide de cet outil, un simple script NX de création d'instance a été réalisé. Son seul paramétrage actuel est le nom de l'instance.
+
+Il fonctionne en créant une application à partir d'une template fixe qu'il copie.
+
+![Interface graphique du script](/assets/instance-creation-script.png)  
+_Interface graphique du script_
+
+Ce fonctionnement n'est pas optimal car il faut en continu mettre à jour la template dès l'ajout d'une nouvelle page commune. Dans le futur le script demandera plutôt une "instance source" sur laquelle baser la nouvelle instance.
+
+Cette fonctionnalité est un _Proof of concept_ et n'est donc pas du tout terminée.
 
 ## Problèmes et améliorations
 
@@ -366,8 +376,6 @@ Ce n'est pas un gros problème pour le moment étant donné le nombre réduit d'
 Le fait que la librairie "ui-page-next" et "ui-pages-react" soient des librairies séparées est dû à l'application Electron développée en parallèle sur la même base. Des problèmes de compatibilité se sont présentés car React et Next n'utilisent pas le même routage.
 
 Une solution à ce problème a désormais été trouvée, comme expliqué dans la section [Components spécifiques](#components-spécifiques), ce qui permettra à la séparation entre les deux librairies de disparaître.
-
-> générateur d'instance
 
 <!-- Styles for markdown numbered headings -->
 <style>
