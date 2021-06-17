@@ -14,6 +14,8 @@
       - [Vitesse d'affichage](#vitesse-daffichage)
       - [Structure](#structure)
     - [Intérêt dans le cas d'intrepid](#intérêt-dans-le-cas-dintrepid-1)
+    - [Problèmes rencontrés](#problèmes-rencontrés)
+      - [Layouts](#layouts)
 
 ## ReactJS
 
@@ -161,6 +163,84 @@ On peut donc dire qu'avec NextJS, IntrepidKnowledge gagnerait en:
 
   Le routage en serait également amélioré car il pourrait respecter les standards REST. Actuellement seule la première section du path identifie la page.  
   `/group/#16253` deviendrait `/groups/16253`
+
+### Problèmes rencontrés
+
+#### Layouts
+
+Les pages possèdent des parties communes appelées _layouts_, par exemple le menu de gauche.
+
+Grâce à la composition il est facile de mettre en place ce fonctionnement en encapsulant chaque page avec le component responsable du _layout_ commun.
+
+Exemple d'une implémentation naïve du _layout_ sur la page des groupes:
+
+```tsx
+export const GroupsPage: FC = () => {
+  return (
+    <MainLayout>
+      <GroupsLayout>
+        <h1>All my groups</h1>
+        ...
+      </GroupsLayout>
+    </MainLayout>
+  );
+};
+```
+
+Voici le résultat sur le site.
+
+![Page des groupes avec layout](../../assets/groups%20page%20layout.png)
+
+- En bleu: \<MainLayout>
+- En rouge: \<GroupsLayout>
+- En vert: le contenu de la page
+
+Le problème de cette approche est que NextJS considère chaque page comme étant indépendantes. Il y aura donc une "copie" des _layouts_ dans chaque page les utilisant, c'est à dire que React les considère comme des éléments séparés. Les _layouts_ perdent ainsi leur état à chaque changement de page en plus d'alourdir considérablement le rendu de celle ci.
+
+Afin de résoudre ce problème, il faut positionner les layouts en dehors des pages. L'élément React du _layout_ sera ainsi commun à toutes les pages.
+
+Un autre problème émerge cependant: Il n'est maintenant plus possible de personnaliser le layout en fonction de la page!
+
+La solution employée pour résoudre ce problème est que la page fournisse son _layout_ au parent responsable de l'affichage des pages. Le layout est accessible par la méthode `getLayout` exposée par la page.
+
+Exemple dans la page des groupes:
+
+```tsx
+export const GroupsPage: PageWithLayout = () => {
+  ...
+  return (
+    <>
+      <h1>All my groups</h1>
+      ...
+    </>
+  );
+};
+
+GroupsPage.getLayout = (page) => (
+  <MainLayout>
+    <GroupsLayout>{page}</GroupsLayout>
+  </MainLayout>
+);
+```
+
+`PageWithLayout` est simplement un type permettant et obligeant l'ajout de la méthode `getLayout` sur le component fonctionnel;
+
+Implémentation dans `_app.tsx`
+
+```tsx
+function App({ Component }: AppProps): JSX.Element {
+  ...
+  return (
+    <PlatformContext.Provider {...}>
+      ...
+      {Component.getLayout(<Component {...} />)}
+      ...
+    </PlatformContext.Provider>
+  );
+}
+```
+
+_\<Component> contient le component de la page actuelle_
 
 <!-- Styles for markdown numbered headings -->
 <style>
